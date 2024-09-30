@@ -1,0 +1,6 @@
+@LolTurnBase_HostAddress = http://localhost:5124
+
+GET {{LolTurnBase_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

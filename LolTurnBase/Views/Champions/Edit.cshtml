@@ -1,0 +1,69 @@
+﻿@model LolTurnBase.Models.Champion
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Champion</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Health" class="control-label"></label>
+                <input asp-for="Health" class="form-control" />
+                <span asp-validation-for="Health" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Mana" class="control-label"></label>
+                <input asp-for="Mana" class="form-control" />
+                <span asp-validation-for="Mana" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Armor" class="control-label"></label>
+                <input asp-for="Armor" class="form-control" />
+                <span asp-validation-for="Armor" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MagicResist" class="control-label"></label>
+                <input asp-for="MagicResist" class="form-control" />
+                <span asp-validation-for="MagicResist" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AttackDamage" class="control-label"></label>
+                <input asp-for="AttackDamage" class="form-control" />
+                <span asp-validation-for="AttackDamage" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AbillityPower" class="control-label"></label>
+                <input asp-for="AbillityPower" class="form-control" />
+                <span asp-validation-for="AbillityPower" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Level" class="control-label"></label>
+                <input asp-for="Level" class="form-control" />
+                <span asp-validation-for="Level" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
