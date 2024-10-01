@@ -32,13 +32,23 @@ namespace LolTurnBase.Controllers
         [HttpGet]
         public async Task<ActionResult<APIResponse>> GetAllChampions()
         {
-            List<Champion> champList = await _db.Champion.ToListAsync();
 
-            _response.Result = _mapper.Map<List<Champion>>(champList);
-            _response.StatusCode = HttpStatusCode.OK;
+            try
+            {
+                List<Champion> champList = await _db.Champion.ToListAsync();
 
-            return Ok(_response);
+                _response.Result = _mapper.Map<List<Champion>>(champList);
+                _response.StatusCode = HttpStatusCode.OK;
+                _logger.LogInformation("The number of champions that are listed is: " + champList.Count);
+               
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex, ex.Message);
+                _response.IsSuccess = false;
+            }
 
+            return _response;
         }
 
         [HttpGet("{id:int}", Name = "Get Champion")]
@@ -50,9 +60,12 @@ namespace LolTurnBase.Controllers
 
         public async Task<ActionResult<APIResponse>> GetOneChampion(int? id)
         {
+           
+
             if (id == null || id == 0)
             {
                 ModelState.AddModelError("ErrorMessages", "The Id of the Champion is invalid");
+                
                 return NotFound(ModelState);
             }
             var champ = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
@@ -109,25 +122,25 @@ namespace LolTurnBase.Controllers
 
             var champ = _mapper.Map<Champion>(championDTO);
             _db.Champion.Update(champ);
-            _db.SaveChanges() ;
+            _db.SaveChanges();
             _response.StatusCode = HttpStatusCode.OK;
             return Ok(_response);
-            
+
         }
         [HttpPatch("{id:int}", Name = "UpdatePartialChampion")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public async Task<ActionResult<APIResponse>> UpdatePartialChamp(int id, JsonPatchDocument<ChampionDTO> championPatch) 
+        public async Task<IActionResult> UpdatePartialChamp(int id, [FromBody] JsonPatchDocument<ChampionDTO> championPatch)
         {
-            if (championPatch == null || id == 0) 
+            if (championPatch == null || id == 0)
             {
                 return BadRequest();
-            }   
-            var champ = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
+            }
+            var champ = await _db.Champion.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             ChampionDTO champDTO = _mapper.Map<ChampionDTO>(champ);
 
-            if (champ == null) 
+            if (champ == null)
             {
                 return BadRequest();
             }
@@ -138,13 +151,37 @@ namespace LolTurnBase.Controllers
 
             _db.Champion.Update(model);
             _db.SaveChanges();
-            
 
-            if (!ModelState.IsValid) 
+
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
             return NoContent();
+        }
+        [HttpDelete("{id:int}", Name = "DeleteChampion")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteChampion(int? id) 
+        {
+            if(id == 0 || id == null) 
+            {
+                ModelState.AddModelError("ErrorMessages", "This Champion does not exist");
+                return BadRequest(ModelState);
+            }
+            var model = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
+            if (model == null) 
+            {
+                ModelState.AddModelError("ErrorMessages", "This Champion does not exist");
+                return BadRequest(ModelState);
+            }
+            _db.Champion.Remove(model);
+            _db.SaveChanges();
+            return NoContent();
+            
         }
     }
 }
