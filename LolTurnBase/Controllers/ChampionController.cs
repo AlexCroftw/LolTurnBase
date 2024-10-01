@@ -2,9 +2,11 @@
 using LolTurnBase.Data;
 using LolTurnBase.Models;
 using LolTurnBase.Models.DTO;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Text.Json;
 
 namespace LolTurnBase.Controllers
 {
@@ -39,16 +41,16 @@ namespace LolTurnBase.Controllers
 
         }
 
-        [HttpGet("{id:int}", Name ="Get Champion")]
+        [HttpGet("{id:int}", Name = "Get Champion")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        public async Task<ActionResult<APIResponse>> GetOneChampion(int id)
+        public async Task<ActionResult<APIResponse>> GetOneChampion(int? id)
         {
-            if (id == null || id == 0) 
+            if (id == null || id == 0)
             {
                 ModelState.AddModelError("ErrorMessages", "The Id of the Champion is invalid");
                 return NotFound(ModelState);
@@ -56,7 +58,7 @@ namespace LolTurnBase.Controllers
             var champ = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
             _response.Result = _mapper.Map<Champion>(champ);
 
-            if (_response.Result == null) 
+            if (_response.Result == null)
             {
                 ModelState.AddModelError("ErrorMessages", "Champion does not exist");
                 return NotFound(ModelState);
@@ -68,26 +70,81 @@ namespace LolTurnBase.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> CreateChampion([FromBody]ChampionDTO championDTO)
+        public async Task<ActionResult<APIResponse>> UpsertChampion([FromBody] ChampionCreateDTO championCreateDTO)
         {
             if (ModelState.IsValid)
             {
-                if (championDTO == null)
+                if (championCreateDTO == null)
                 {
                     ModelState.AddModelError("ErrorMessages", "Item is null and void");
                     return BadRequest(ModelState);
                 }
 
-                var champion = _mapper.Map<Champion>(championDTO);
+                var champion = _mapper.Map<Champion>(championCreateDTO);
+
                 await _db.Champion.AddAsync(champion);
                 _db.SaveChanges();
+                _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
+
             }
-            else 
+            else
             {
                 return BadRequest(ModelState);
             }
-           
+
+        }
+
+        [HttpPut("{id:int}", Name = "UpdateChampion")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<ActionResult<APIResponse>> UpdateChampion([FromBody] ChampionDTO championDTO, int? id)
+        {
+            if (championDTO == null || id != championDTO.Id)
+            {
+                return BadRequest();
+            }
+
+            var champ = _mapper.Map<Champion>(championDTO);
+            _db.Champion.Update(champ);
+            _db.SaveChanges() ;
+            _response.StatusCode = HttpStatusCode.OK;
+            return Ok(_response);
+            
+        }
+        [HttpPatch("{id:int}", Name = "UpdatePartialChampion")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+        public async Task<ActionResult<APIResponse>> UpdatePartialChamp(int id, JsonPatchDocument<ChampionDTO> championPatch) 
+        {
+            if (championPatch == null || id == 0) 
+            {
+                return BadRequest();
+            }   
+            var champ = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
+            ChampionDTO champDTO = _mapper.Map<ChampionDTO>(champ);
+
+            if (champ == null) 
+            {
+                return BadRequest();
+            }
+
+            championPatch.ApplyTo(champDTO);
+
+            Champion model = _mapper.Map<Champion>(champDTO);
+
+            _db.Champion.Update(model);
+            _db.SaveChanges();
+            
+
+            if (!ModelState.IsValid) 
+            {
+                return BadRequest();
+            }
+            return NoContent();
         }
     }
 }
