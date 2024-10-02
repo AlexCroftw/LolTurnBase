@@ -1,4 +1,6 @@
-﻿namespace LolTurnBase.Models.DTO
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace LolTurnBase.Models.DTO
 {
     public class ItemDTO
     {
@@ -12,5 +14,7 @@
         public int AttackDamageGained { get; set; }
         public int AbillityPowerGained { get; set; }
         public int Cost {  get; set; }
+        [ValidateNever]
+        public ChampionDTO Champion { get; set; }
     }
 }

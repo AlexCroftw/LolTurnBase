@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LolTurnBase.Models
 {
@@ -15,8 +16,10 @@ namespace LolTurnBase.Models
         public int AbillityPowerGained { get; set; }
         public int Cost { get; set; }
         public int? ChampionID { get; set; }
+
         [ForeignKey("ChampionID")]
-        public Champion Champion { get; set; }
+        [ValidateNever]
+       public Champion Champion { get; set; }
 
     }
 }

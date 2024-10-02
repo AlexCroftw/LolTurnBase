@@ -3,6 +3,7 @@ using LolTurnBase.Data;
 using LolTurnBase.Models;
 using LolTurnBase.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
@@ -121,5 +122,13 @@ namespace LolTurnBase.Controllers
             return Ok(ModelState);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AddItemToChampion(ItemDetailsDTO itemDetailsDTO)
+        {
+            List<SelectListItem> champlist = new();
+            champlist.AddRange(itemDetailsDTO.ChampionList);
+        }
+
     }
+    
 }
