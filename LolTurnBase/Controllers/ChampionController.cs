@@ -39,6 +39,7 @@ namespace LolTurnBase.Controllers
 
                 _response.Result = _mapper.Map<List<Champion>>(champList);
                 _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
                 _logger.LogInformation("The number of champions that are listed is: " + champList.Count);
                
             }
@@ -60,36 +61,48 @@ namespace LolTurnBase.Controllers
 
         public async Task<ActionResult<APIResponse>> GetOneChampion(int? id)
         {
+            try
+            {
+                if (id == null || id == 0)
+                {
+                    ModelState.AddModelError("ErrorMessages", "The Id of the Champion is invalid");
+
+                    return NotFound(ModelState);
+                }
+                var champ = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
+                _response.Result = _mapper.Map<Champion>(champ);
+
+                if (_response.Result == null)
+                {
+                    ModelState.AddModelError("ErrorMessages", "Champion does not exist");
+                    return NotFound(ModelState);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+                _response.IsSuccess = false;
+            }
+
            
-
-            if (id == null || id == 0)
-            {
-                ModelState.AddModelError("ErrorMessages", "The Id of the Champion is invalid");
-                
-                return NotFound(ModelState);
-            }
-            var champ = await _db.Champion.FirstOrDefaultAsync(x => x.Id == id);
-            _response.Result = _mapper.Map<Champion>(champ);
-
-            if (_response.Result == null)
-            {
-                ModelState.AddModelError("ErrorMessages", "Champion does not exist");
-                return NotFound(ModelState);
-            }
-            return Ok(_response);
+            return _response;
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> UpsertChampion([FromBody] ChampionCreateDTO championCreateDTO)
+        public async Task<ActionResult<APIResponse>> CreateChampion([FromBody] ChampionCreateDTO championCreateDTO)
         {
-            if (ModelState.IsValid)
+
+            try
             {
+
                 if (championCreateDTO == null)
                 {
                     ModelState.AddModelError("ErrorMessages", "Item is null and void");
+                    _response.IsSuccess=false;
                     return BadRequest(ModelState);
                 }
 
@@ -98,13 +111,17 @@ namespace LolTurnBase.Controllers
                 await _db.Champion.AddAsync(champion);
                 _db.SaveChanges();
                 _response.StatusCode = HttpStatusCode.OK;
-                return Ok(_response);
-
+               
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest(ModelState);
+
+                _logger.LogError(ex, ex.Message);
+                _response.IsSuccess = false;
             }
+
+            return _response;
+
 
         }
 

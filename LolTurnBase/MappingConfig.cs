@@ -11,6 +11,7 @@ namespace LolTurnBase
             CreateMap<Champion,ChampionDTO>().ReverseMap();
             CreateMap<Champion, ChampionCreateDTO>().ReverseMap();
             CreateMap<Item, ItemDTO>().ReverseMap();
+            CreateMap<Item,ItemCreateDTO>().ReverseMap(); 
         }
     }
 }
