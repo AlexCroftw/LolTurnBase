@@ -25,7 +25,7 @@ namespace LolTurnBase.Data
             modelBuilder.Entity<Item>().HasData
                 (
                  new Item {Id = 1, AbillityPowerGained = 20, ArmorGained = 15, AttackDamageGained = 30, Description="Provides Random Stuff",
-                          HealthGained = 100, MagicResitGained = 100, ManaGained = 100, Name = "Allmighty", Cost = 999999 }
+                          HealthGained = 100, MagicResitGained = 100, ManaGained = 100, Name = "Allmighty", Cost = 999999 , ChampionID = 1}
                 );
         }
     }

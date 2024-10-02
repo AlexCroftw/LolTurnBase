@@ -1,4 +1,6 @@
-﻿namespace LolTurnBase.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace LolTurnBase.Models
 {
     public class Item
     {
@@ -12,6 +14,9 @@
         public int AttackDamageGained { get; set; }
         public int AbillityPowerGained { get; set; }
         public int Cost { get; set; }
+        public int? ChampionID { get; set; }
+        [ForeignKey("ChampionID")]
+        public Champion Champion { get; set; }
 
     }
 }
